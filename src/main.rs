@@ -5,6 +5,8 @@ use chunk::Chunk;
 use chunk_type::ChunkType;
 use clap::Parser;
 use png::Png;
+use reqwest::blocking::get;
+use url::Url;
 
 use crate::args::Args;
 use crate::commands::Commands;
@@ -28,12 +30,12 @@ fn main() {
             message,
             output_path,
         }) => {
-            //println!("{:?}", filepath);
-            //println!("{:?}", chunk_type);
-            //println!("{:?}", message);
-            //println!("{:?}", output_path);
 
-            let png_file: &[u8] = &fs::read(filepath).unwrap();
+            let png_file: &[u8] = match Url::parse(filepath) {
+                Ok(url) => {&get(url).unwrap().bytes().unwrap()},
+                Err(_) => {&fs::read(filepath).unwrap()},
+            };
+            //let png_file: &[u8] = &fs::read(filepath).unwrap();
             //println!("{:?}", png_file)
             let mut png = Png::try_from(png_file).unwrap();
             println!("{:?}", png);
@@ -55,8 +57,6 @@ fn main() {
             let png_file: &[u8] = &fs::read(filepath).unwrap();
             let png = Png::try_from(png_file).unwrap();
 
-
-            //let msg_loc = ChunkType::from_str(chunk_type).unwrap();
             let hidden_message = png.chunk_by_type(chunk_type).unwrap();
             println!("{:?}", hidden_message.to_string())
         }

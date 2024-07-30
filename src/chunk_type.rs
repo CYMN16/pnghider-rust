@@ -6,20 +6,20 @@ use std::{
 #[derive(PartialEq, Eq)]
 #[derive(Debug)]
 pub struct ChunkType {
-    b1: u8,
-    b2: u8,
-    b3: u8,
-    b4: u8,
+    critical: u8,
+    public: u8,
+    reserved: u8,
+    safe_to_copy: u8,
 }
 
 impl TryFrom<[u8; 4]> for ChunkType {
     type Error = String;
     fn try_from(arr: [u8; 4]) -> Result<Self, Self::Error> {
         Ok(Self {
-            b1: arr[0],
-            b2: arr[1],
-            b3: arr[2],
-            b4: arr[3],
+            critical: arr[0],
+            public: arr[1],
+            reserved: arr[2],
+            safe_to_copy: arr[3],
         })
     }
 }
@@ -32,10 +32,10 @@ impl FromStr for ChunkType {
         }
         if s.len() == 4 {
             Ok(Self {
-                b1: s.as_bytes()[0],
-                b2: s.as_bytes()[1],
-                b3: s.as_bytes()[2],
-                b4: s.as_bytes()[3],
+                critical: s.as_bytes()[0],
+                public: s.as_bytes()[1],
+                reserved: s.as_bytes()[2],
+                safe_to_copy: s.as_bytes()[3],
             })
         } else {
             Err("Incorrect string size!".to_string())
@@ -55,22 +55,22 @@ impl Display for ChunkType {
 
 impl ChunkType {
     pub fn bytes(&self) -> [u8; 4] {
-        [self.b1, self.b2, self.b3, self.b4]
+        [self.critical, self.public, self.reserved, self.safe_to_copy]
     }
 
     fn is_critical(&self) -> bool {
-        self.b1.is_ascii_uppercase()
+        self.critical.is_ascii_uppercase()
     }
     fn is_public(&self) -> bool {
-        self.b2.is_ascii_uppercase()
+        self.public.is_ascii_uppercase()
     }
     fn is_reserved_bit_valid(&self) -> bool {
-        self.b3.is_ascii_uppercase()
+        self.reserved.is_ascii_uppercase()
     }
     fn is_safe_to_copy(&self) -> bool {
-        self.b4.is_ascii_lowercase()
+        self.safe_to_copy.is_ascii_lowercase()
     }
-    fn is_valid(&self) -> bool {
+    pub fn is_valid(&self) -> bool {
         self.is_reserved_bit_valid()
     }
 }
